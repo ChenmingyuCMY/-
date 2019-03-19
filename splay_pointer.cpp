@@ -27,21 +27,21 @@ public:
     }
 private:
     struct Node{
-        Node(int _val=0,Node* _f=NULL,Node *ch0=NULL,Node *ch1=NULL,int _sum=1,int _size=1):val(_val),f(_f),sum(_sum),size(_size){ch[0]=ch0,ch[1]=ch1;}
+        Node(int _val=0,Node* _f=NULL,int _sum=1,int _size=1):val(_val),f(_f),sum(_sum),size(_size){}
         Node *ch[2],*f;
         int sum,size,val;
     };
     void insert(int x){
         Node *cur=root,*p=blank;
-        while(cur!=blank&&va(cur)!=x){
+        while(!bl(cur)&&va(cur)!=x){
             p=cur;
             cur=so(cur,x>va(cur));
         }
-        if(cur!=blank)su(cur)++;
+        if(!bl(cur))su(cur)++;
         else{
             cur=NULL;
             newNode(cur,x,p);
-            if(p!=blank)so(p,x>va(p))=cur;
+            if(!bl(p))so(p,x>va(p))=cur;
         }
         splay(cur);
     }
@@ -58,7 +58,7 @@ private:
     }
     int rnk(int x){
         Node *cur=root;
-        while(so(cur,x>va(cur))!=blank&&x!=va(cur)){
+        while(!bl(so(cur,x>va(cur)))&&x!=va(cur)){
             cur=so(cur,x>va(cur));
         }
         splay(cur);
@@ -67,7 +67,7 @@ private:
     Node* find(int k){
         Node *cur=root;
         while(1){
-            if(so(cur,0)!=blank&&k<=si(so(cur,0))){
+            if(!bl(so(cur,0))&&k<=si(so(cur,0))){
                 cur=so(cur,0);
             }else if(k>si(so(cur,0))+su(cur)){
                 k-=si(so(cur,0))+su(cur);
@@ -81,14 +81,14 @@ private:
         rnk(x);
         if(va(root)<x)return root;
         Node* cur=so(root,0);
-        while(so(cur,1)!=blank)cur=so(cur,1);
+        while(!bl(so(cur,1)))cur=so(cur,1);
         return cur;
     }
     Node* suc(int x){
         rnk(x);
         if(va(root)>x)return root;
         Node* cur=so(root,1);
-        while(so(cur,0)!=blank)cur=so(cur,0);
+        while(!bl(so(cur,0)))cur=so(cur,0);
         return cur;
     }
     bool ckP(Node* x){
@@ -115,13 +115,17 @@ private:
             }
             rotate(x);
         }
-        if(goal==blank)root=x;
+        if(bl(goal))root=x;
     }
     void ck(Node* &p){
         if(p==NULL)p=blank;
     }
+    bool bl(Node* p){
+        return p==blank;
+    }
     void newNode(Node *&p,int v,Node *f){
-        p=new Node(v,f,blank,blank);
+        p=new Node(v,f);
+        so(p,0)=so(p,1)=blank;
     }
     void delNode(Node *&p){
         delete(p);
