@@ -2,6 +2,11 @@
 using namespace std;
 const int Mx=2e5+5;
 int n;
+struct Node{
+    Node(int _val=0,Node* _f=NULL,int _sum=1,int _size=1):val(_val),f(_f),sum(_sum),size(_size){}
+    Node *ch[2],*f;
+    int sum,size,val;
+};
 class Splay{
 #define fa(x) (x)->f
 #define so(x,k) (x)->ch[(k)]
@@ -10,10 +15,10 @@ class Splay{
 #define va(x) (x)->val
 public:
     Splay(){
-        blank=new Node();
-        fa(blank)=so(blank,0)=so(blank,1)=blank;
-        si(blank)=su(blank)=0;
-        root=blank;
+        blk=new Node();
+        fa(blk)=so(blk,0)=so(blk,1)=blk;
+        si(blk)=su(blk)=0;
+        root=blk;
     }
     void work(int op,int x){
         switch(op){
@@ -25,14 +30,8 @@ public:
             case 6:printf("%d\n",va(suc(x)));break;
         }
     }
-private:
-    struct Node{
-        Node(int _val=0,Node* _f=NULL,int _sum=1,int _size=1):val(_val),f(_f),sum(_sum),size(_size){}
-        Node *ch[2],*f;
-        int sum,size,val;
-    };
     void insert(int x){
-        Node *cur=root,*p=blank;
+        Node *cur=root,*p=blk;
         while(!bl(cur)&&va(cur)!=x){
             p=cur;
             cur=so(cur,x>va(cur));
@@ -91,6 +90,7 @@ private:
         while(!bl(so(cur,0)))cur=so(cur,0);
         return cur;
     }
+private:
     bool ckP(Node* x){
         return so(fa(x),1)==x;
     }
@@ -118,20 +118,20 @@ private:
         if(bl(goal))root=x;
     }
     void ck(Node* &p){
-        if(p==NULL)p=blank;
+        if(p==NULL)p=blk;
     }
     bool bl(Node* p){
-        return p==blank;
+        return p==blk;
     }
     void newNode(Node *&p,int v,Node *f){
         p=new Node(v,f);
-        so(p,0)=so(p,1)=blank;
+        so(p,0)=so(p,1)=blk;
     }
     void delNode(Node *&p){
         delete(p);
-        p=blank;
+        p=blk;
     }
-    Node *root,*blank;
+    Node *root,*blk;
 #undef fa
 #undef so
 #undef si
