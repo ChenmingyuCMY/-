@@ -28,7 +28,7 @@ public:
         pushUp(x);
     }
     void reverse(int l,int r){
-        Node *x=find(root,l),*y=find(root,r+2);
+        Node *x=find(l),*y=find(r+2);
         splay(x);splay(y,x);
         tg(so(y,0))^=1;
     }
@@ -43,11 +43,19 @@ public:
     }
     Node *root,*blk;
 private:
-    Node* find(Node *x,int k){
-        pushDown(x);
-        if(k==si(so(x,0))+1)return x;
-        if(k<=si(so(x,0)))return find(so(x,0),k);
-        return find(so(x,1),k-si(so(x,0))-1);   
+    Node* find(int k){
+        Node *cur=root;
+        while(1){
+            pushDown(cur);
+            if(!bl(so(cur,0))&&k<=si(so(cur,0))){
+                cur=so(cur,0);
+            }else if(k>si(so(cur,0))+1){
+                k-=si(so(cur,0))+1;
+                cur=so(cur,1);
+            }else{
+                return cur;
+            }
+        }
     }
     bool ckP(Node* x){
         return so(fa(x),1)==x;
