@@ -1,126 +1,163 @@
-#include<bits/stdc++.h>
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+#include<cmath>
+#include<queue>
 using namespace std;
-const int Mx=2e5+5;
-int n;
+typedef long long LL;
+const int MxN=1e5+10086,inf=192608170;
 class Splay{
-#define fa(x) node[(x)].f
-#define so(x,k) node[(x)].ch[(k)]
-#define si(x) node[(x)].size
-#define su(x) node[(x)].sum
-#define va(x) node[(x)].val
+#define sz(x) node[x].sz
+#define vl(x) node[x].vl
+#define tP(x) node[x].tP
+#define sm(x) node[x].sm
+#define ft(x) node[x].ft
+#define sn(x,i) node[x].ch[i] 
+#define ls sn(x,0)
+#define rs sn(x,1)
 public:
-    void insert(int x){
-        int cur=root,p=0;
-        while(cur&&va(cur)!=x){
-            p=cur;
-            cur=so(cur,x>va(cur));
-        }
-        if(cur)su(cur)++;
-        else{
-            cur=++size;
-            if(p)so(p,x>va(p))=cur;
-            so(cur,0)=so(cur,1)=0;
-            fa(cur)=p;va(cur)=x;
-            su(cur)=si(cur)=1;
-        }
-        splay(cur);
+    Splay(){
+        root=size=top=1;vl(1)=inf;
+        newNode(sn(1,0),1,-inf);
+        sz(1)=sm(1)=1;
+        pushUp(1);
+        size++;
     }
-    int rnk(int x){
-        int cur=root;
-        while(so(cur,x>va(cur))&&x!=va(cur)){
-            cur=so(cur,x>va(cur));
-        }
-        splay(cur);
-        return si(so(cur,0));
+    int ask(int k){
+        return vl(fnd(k));
     }
-    int find(int k){
-        int cur=root;
-        while(1){
-            if(so(cur,0)&&k<=si(so(cur,0))){
-                cur=so(cur,0);
-            }else if(k>si(so(cur,0))+su(cur)){
-                k-=si(so(cur,0))+su(cur);
-                cur=so(cur,1);
-            }else{
-                return cur;
-            }
-        }
+    int insert(int k){
+        int p=pre(k),s=suc(k);
+        splay(s),splay(p,s);
+        if(sn(p,1))sm(sn(p,1))++;
+        else newNode(sn(p,1),p,k);
+        pushUp(p);pushUp(s);
+        splay(sn(p,1));
+        size++;
     }
-    int pre(int x){
-        rnk(x);
-        if(va(root)<x)return root;
-        int cur=so(root,0);
-        while(so(cur,1))cur=so(cur,1);
-        return cur;
-    }
-    int suc(int x){
-        rnk(x);
-        if(va(root)>x)return root;
-        int cur=so(root,1);
-        while(so(cur,0))cur=so(cur,0);
-        return cur;
-    }
-    void remove(int x){
-        int p=pre(x),s=suc(x);
+    int remove(int k){
+        int p=pre(k),s=suc(k);
         splay(p);splay(s,p);
-        int del=so(s,0);
-        if(su(del)>1){
-            su(del)--;
-            splay(del);
+        int x=sn(s,0);
+        if(sm(x)>1){
+            sm(x)--;
+            splay(x);
         }else{
-            so(s,0)=0;
+            sn(s,0)=0;
         }
     }
-    int val(int x){return va(x);}
+    int rnk(int k){
+        int x=root;
+        while(!pushDown(x)&&sn(x,vl(x)<k)&&k!=vl(x))x=sn(x,vl(x)<k);
+        splay(x);
+        return sz(ls);
+    }
+    int fnd(int k){
+        int x=root;
+        for(;;){
+            pushDown(x);
+            if(ls&&sz(ls)>=k)x=ls;
+            else if(rs&&sz(ls)+sm(x)<k)k-=sz(ls)+sm(x),x=rs;
+            else return x;
+        }
+    }
+    int pre(int k){
+        rnk(k);
+        if(vl(root)<k)return root;
+        int x=sn(root,0);
+        while(rs&&!pushDown(x))x=rs;
+        return x;
+    }
+    int suc(int k){
+        rnk(k);
+        if(vl(root)>k)return root;
+        int x=sn(root,1);
+        while(ls&&!pushDown(x))x=ls;
+        return x;
+    }
+    int add(int k){
+        return vl(root)+=k,tP(root)+=k,0;
+    }
+    int del(int k){
+        return vl(root)-=k,tP(root)-=k,0;
+    }
+    int _sz(){
+        return size;
+    }
+    int _lv(){
+        return leave;
+    }
+    int _rt(){
+        return root;
+    }
+    int _vl(int x){
+        return vl(x);
+    }
 private:
-    bool ckP(int x){
-        return so(fa(x),1)==x;
-    }
-    void pushUp(int x){
-        si(x)=si(so(x,0))+si(so(x,1))+su(x);
-    }
-    void rotate(int x){
-        int y=fa(x),z=fa(y),k=ckP(x),w=so(x,k^1);
-        so(y,k)=w;fa(w)=y;
-        so(z,ckP(y))=x;fa(x)=z;
-        so(x,k^1)=y;fa(y)=x;
-        pushUp(y);pushUp(x);
-    }
-    void splay(int x,int goal=0){
-        while(fa(x)!=goal){
-            int y=fa(x),z=fa(y);
-            if(z!=goal){
-                if(ckP(x)==ckP(y))rotate(y);
-                else rotate(x);
-            }
-            rotate(x);
-        }
-        if(!goal)root=x;
-    }
+    int leave,root,size,top;
     struct Node{
-        int f,ch[2],sum,size,val;
-    }node[Mx];
-    int size,root;
-#undef fa
-#undef so
-#undef si
-#undef su
-#undef va
+        int ch[2],ft,sz,vl,tP,sm;
+    }node[MxN];
+    queue<int>th;
+    int pushUp(int x){
+        sz(x)=sz(ls)+sz(rs)+sm(x);
+    }
+    int pushDown(int x){
+        if(!tP(x))return 0;
+        if(ls)vl(ls)+=tP(x),tP(ls)+=tP(x);
+        if(rs)vl(rs)+=tP(x),tP(rs)+=tP(x);
+        return tP(x)=0;
+    }
+    int rotate(int x){
+        int f=ft(x),ff=ft(f),h=ws(x),w=sn(x,h^1);
+        sn(f,h)=w;ft(w)=f;
+        sn(ff,ws(f))=x;ft(x)=ff;
+        sn(x,h^1)=f;ft(f)=x;
+        pushUp(f);pushUp(x);
+    }
+    int splay(int x,int pos=0){
+        for(;ft(x)!=pos;rotate(x))if(ft(ft(x))!=pos)rotate(ws(ft(x))==ws(x)?ft(x):x);
+        if(pos==0)root=x;
+    }
+    int ws(int x){
+        return sn(ft(x),1)==x;
+    }
+    int delNode(){
+        int x;
+        if(th.empty())x=++top;
+        else x=th.front(),th.pop();
+        ls=rs=tP(x)=0;
+        return x;
+    }
+    int newNode(int &x,int f,int v){
+        x=delNode();
+        ft(x)=f;vl(x)=v;
+        sz(x)=sm(x)=1;
+        return x;
+    }
+#undef sz
+#undef vl
+#undef tP
+#undef sm
+#undef ft
+#undef sn
+#undef ls
+#undef rs
 }T;
-int main(){
+int n,m,k;
+char op[10];
+int main(int argc,char **argv){
     scanf("%d",&n);
-    T.insert(INT_MAX);
-    T.insert(INT_MIN);
-    while(n--){
-        int op,x;
+    for(int op,x;n;n--){
         scanf("%d%d",&op,&x);
         switch(op){
             case 1:T.insert(x);break;
             case 2:T.remove(x);break;
             case 3:printf("%d\n",T.rnk(x));break;
-            case 4:printf("%d\n",T.val(T.find(x+1)));break;
-            case 5:printf("%d\n",T.val(T.pre(x)));break;
-            case 6:printf("%d\n",T.val(T.suc(x)));break;
+            case 4:printf("%d\n",T._vl(T.fnd(x+1)));break;
+            case 5:printf("%d\n",T._vl(T.pre(x)));break;
+            case 6:printf("%d\n",T._vl(T.suc(x)));break;
         }
     }
+
 }
