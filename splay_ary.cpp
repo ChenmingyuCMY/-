@@ -39,12 +39,8 @@ public:
         int p=pre(k),s=suc(k);
         splay(p);splay(s,p);
         int x=sn(s,0);
-        if(sm(x)>1){
-            sm(x)--;
-            splay(x);
-        }else{
-            sn(s,0)=0;
-        }
+        if(sm(x)>1)sm(x)--,splay(x);
+        else th.push(sn(s,0)),sn(s,0)=0;
     }
     int rnk(int k){
         int x=root;
