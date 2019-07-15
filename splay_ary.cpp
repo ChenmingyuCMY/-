@@ -9,7 +9,6 @@ const int MxN=1e5+10086,inf=192608170;
 class Splay{
 #define sz(x) node[x].sz
 #define vl(x) node[x].vl
-#define tP(x) node[x].tP
 #define sm(x) node[x].sm
 #define ft(x) node[x].ft
 #define sn(x,i) node[x].ch[i] 
@@ -44,14 +43,13 @@ public:
     }
     int rnk(int k){
         int x=root;
-        while(!pushDown(x)&&sn(x,vl(x)<k)&&k!=vl(x))x=sn(x,vl(x)<k);
+        while(sn(x,vl(x)<k)&&k!=vl(x))x=sn(x,vl(x)<k);
         splay(x);
         return sz(ls);
     }
     int fnd(int k){
         int x=root;
         for(;;){
-            pushDown(x);
             if(ls&&sz(ls)>=k)x=ls;
             else if(rs&&sz(ls)+sm(x)<k)k-=sz(ls)+sm(x),x=rs;
             else return x;
@@ -61,14 +59,14 @@ public:
         rnk(k);
         if(vl(root)<k)return root;
         int x=sn(root,0);
-        while(rs&&!pushDown(x))x=rs;
+        while(rs)x=rs;
         return x;
     }
     int suc(int k){
         rnk(k);
         if(vl(root)>k)return root;
         int x=sn(root,1);
-        while(ls&&!pushDown(x))x=ls;
+        while(ls)x=ls;
         return x;
     }
     int add(int k){
@@ -92,17 +90,11 @@ public:
 private:
     int leave,root,size,top;
     struct Node{
-        int ch[2],ft,sz,vl,tP,sm;
+        int ch[2],ft,sz,vl,sm;
     }node[MxN];
     queue<int>th;
     int pushUp(int x){
         sz(x)=sz(ls)+sz(rs)+sm(x);
-    }
-    int pushDown(int x){
-        if(!tP(x))return 0;
-        if(ls)vl(ls)+=tP(x),tP(ls)+=tP(x);
-        if(rs)vl(rs)+=tP(x),tP(rs)+=tP(x);
-        return tP(x)=0;
     }
     int rotate(int x){
         int f=ft(x),ff=ft(f),h=ws(x),w=sn(x,h^1);
@@ -133,7 +125,6 @@ private:
     }
 #undef sz
 #undef vl
-#undef tP
 #undef sm
 #undef ft
 #undef sn
