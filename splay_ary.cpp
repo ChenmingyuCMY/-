@@ -108,7 +108,7 @@ private:
         int x;
         if(th.empty())x=++top;
         else x=th.front(),th.pop();
-        ls=rs=tP(x)=0;
+        ls=rs=0;
         return x;
     }
     int newNode(int &x,int f,int v){
