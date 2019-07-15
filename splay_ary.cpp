@@ -69,12 +69,6 @@ public:
         while(ls)x=ls;
         return x;
     }
-    int add(int k){
-        return vl(root)+=k,tP(root)+=k,0;
-    }
-    int del(int k){
-        return vl(root)-=k,tP(root)-=k,0;
-    }
     int _sz(){
         return size;
     }
